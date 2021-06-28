@@ -76,14 +76,37 @@ volatile uint8_t pressure_prog_offset = 0;
 volatile uint8_t pressure_next_prog = 0;
 volatile uint8_t pressure_repeat = 0;
 volatile float current_pressure_goal = 0.0;
+const float target_offset = 0.05;
 
-const int basic_ms_for_pulse = 50;
+// in 5 sec --> 0.1ATM
+const unsigned int ms_weight = 4500 * 10;
+const unsigned int ms_high_pulse = 6000;
+const unsigned int ms_mid_pulse = 4000;
+const unsigned int ms_low_pulse = 650;
+
 const int rest_ms = 2000;
-const float pressure_range_ok = 0.05;
+const float pressure_range_ok = 0.02;
 
-float current_pressure_sensor = 0.0;
+volatile float current_pressure_sensor = 0.0;
 float p_inc = 0.0005;
 // --------- end of Pressure sensor program params
+
+// --------- pressure sensor buffers
+uint8_t pressure_id = 0x28; // i2c address
+uint8_t data[7]; // holds output data
+uint8_t cmd[3] = {0xAA, 0x00, 0x00}; // command to be sent
+//double press_counts = 0; // digital pressure reading [counts]
+//double temp_counts = 0; // digital temperature reading [counts]
+//double pressure = 0; // pressure reading [bar, psi, kPa, etc.]
+//double temperature = 0; // temperature reading in deg C
+const double outputmax = 15099494; // output at maximum pressure [counts]
+const double outputmin = 1677722; // output at minimum pressure [counts]
+const double pmax = 8.7; // maximum value of pressure range [bar, psi, kPa, etc.]
+const double pmin = 0.05; // minimum value of pressure range [bar, psi, kPa, etc.]
+double percentage = 0; // holds percentage of full scale data
+char printBuffer[200], cBuff[20], percBuff[20], pBuff[20] , tBuff[20];
+
+// --------- end pressure sensor buffers
 
 //RotaryEncoder encoder(RotaryEncPinA, RotaryEncPinB);
 
@@ -101,7 +124,7 @@ auto pulse_out_timer = timer.every(0, dummy_func);
 auto pressure_check_timer = timer.every(0, dummy_func);
 auto stop_pressure_fill_timer = timer.every(0, dummy_func);
 auto check_pressure_timer = timer.every(0, dummy_func);
-
+auto pressure_step_wait_timer = timer.every(0, dummy_func);
 
 volatile uint8_t trig_data[8] = {0, 0, 0, 0, 1, 0, 1, 0};
 

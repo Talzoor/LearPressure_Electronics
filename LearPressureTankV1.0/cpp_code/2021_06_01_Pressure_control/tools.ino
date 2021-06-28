@@ -690,6 +690,8 @@ void set_scr00_vars(int8_t _prog) {
   global_vars_init();
   prog = (_prog > 9) ? 0 : ((_prog < 0) ? 9 : _prog);
   var_default[0] = prog;
+  var_default[1] = prog;
+
   menu.Set_vars(var_default);
   menu.update_screen();
 }
@@ -793,7 +795,7 @@ void run_program_now_with_sensor() {
   menu.update_screen();
 
   prog_time = Pressure_TimePerStep[prog_to_run];
-  pressure_target = Pressure_target[prog_to_run];
+  pressure_target = Pressure_target[prog_to_run] + target_offset;
   pressure_step_atm = Pressure_step[prog_to_run];
   pressure_time_per_step = Pressure_TimePerStep[prog_to_run];
   pressure_prog_offset = Pressure_ProgTrigOffset[prog_to_run];
@@ -883,6 +885,12 @@ void stop_program_now(bool _stop_all) {
   timer.cancel(pulse_on_timer);
   timer.cancel(pulse_off_timer);
   timer.cancel(next_p_timer);
+
+  // pressure timers
+  timer.cancel(pressure_check_timer);
+  timer.cancel(check_pressure_timer);
+  timer.cancel(stop_pressure_fill_timer);
+  timer.cancel(pressure_step_wait_timer);
 
   prog_off_var = true;
   pulse_off_now();

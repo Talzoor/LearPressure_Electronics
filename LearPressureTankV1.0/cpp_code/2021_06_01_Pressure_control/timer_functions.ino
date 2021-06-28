@@ -82,6 +82,8 @@ void timer_setup() {
   timer.cancel(pressure_check_timer);
   timer.cancel(check_pressure_timer);
   timer.cancel(stop_pressure_fill_timer);
+  timer.cancel(pressure_step_wait_timer);
+
 }
 
 bool shutoff_prog() {
@@ -141,9 +143,13 @@ bool start_prog_pressure() {
   Debug.print(DBG_INFO, F("------------- PROG_START_pressure ------------- \n"));
   //  timer.cancel(program_offset_timer);
   prog_off_var = false;
+  current_pressure_goal = (pressure_target > current_pressure_sensor) ? \
+                          current_pressure_sensor + pressure_step_atm : \
+                          current_pressure_sensor - pressure_step_atm;
+  current_pressure_goal = constrain(current_pressure_goal, 0, pressure_target);
   check_pressure_and_decide();
-//  current_pressure_goal = pressure_target; //+= pressure_step_atm;
-//  go_to_pressure(current_pressure_goal);
+  //  current_pressure_goal = pressure_target; //+= pressure_step_atm;
+  //  go_to_pressure(current_pressure_goal);
 
   //  pulse_on_now();
   //  Debug.print(DBG_INFO, F("p_up_len:%d\n"), params.p_up_len);

@@ -30,4 +30,8 @@ void stop_and_rest();
 void check_pressure_and_decide();
 float check_pressure_sensor();
 bool pressure_in_range(float _p_now, float _curr_p_goal);
+float read_pressure_sensor();
+unsigned long how_far_pressure(float _p_goal);
+void pressure_update_on_rest_timer();
+bool go_to_pressure();
 //void handleEvent(AceButton* button, uint8_t eventType, uint8_t buttonState);

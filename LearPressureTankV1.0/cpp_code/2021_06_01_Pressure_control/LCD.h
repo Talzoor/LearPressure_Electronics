@@ -167,7 +167,7 @@ class lcd_menu
         }
         else if (strcmp_P(_tmp_sec_str, PSTR("P=")) == 0) {
           char bf[10];
-          sprintf_P(buffer, PSTR("%sATM"), dtostrf(this->pressure, 2, 2, bf)/*P_val*/);
+          sprintf_P(buffer, PSTR("%s ATM"), dtostrf(this->pressure, 2, 2, bf)/*P_val*/);
         }
         else if (strcmp_P(_tmp_sec_str, PSTR("Step")) == 0) {
           char bf[10];
