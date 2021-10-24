@@ -385,7 +385,7 @@ void decide(uint8_t _cur_screen, uint8_t cur_selection, uint8_t _button_click, u
       if (strcmp_P(scr_cur_text, PSTR("NextProg")) == 0) {
         uint8_t prog_next = Pressure_NextProg[prog_num];
         prog_next += (inc * 1);
-        prog_next = (prog_next > 9) ? 0 : prog_next;
+        prog_next = (prog_next > 10) ? 0 : prog_next;
         Pressure_NextProg[prog_num] = prog_next;
       }
       if (strcmp_P(scr_cur_text, PSTR("Repeat")) == 0) {
@@ -569,7 +569,7 @@ void decide(uint8_t _cur_screen, uint8_t cur_selection, uint8_t _button_click, u
       if (strcmp_P(scr_cur_text, PSTR("NextProg")) == 0) {
         int8_t prog_next = Pressure_NextProg[prog_num];
         prog_next -= (inc * 1);
-        prog_next = (prog_next < 0) ? 9 : prog_next;
+        prog_next = (prog_next < 0) ? 10 : prog_next;
         Pressure_NextProg[prog_num] = prog_next;
       }
       if (strcmp_P(scr_cur_text, PSTR("Repeat")) == 0) {
@@ -791,6 +791,13 @@ void print_prog_params(byte _prog_to_run, long _ttl_time, long _offset_ms, bool 
 }
 
 void run_program_now_with_sensor() {
+  pressure_main_prog_runing = prog_to_run;
+  pressure_repeat = Pressure_ProgRepeat[prog_to_run]; //need to run main prog last
+  run_program_with_sensor_next_prog();
+}
+
+void run_program_with_sensor_next_prog() {
+  Debug.print(DBG_INFO, F("REPEAT:%d\n"), pressure_repeat);
   menu.Set_cur_screen(90);
   menu.update_screen();
 
@@ -800,11 +807,23 @@ void run_program_now_with_sensor() {
   pressure_time_per_step = Pressure_TimePerStep[prog_to_run];
   pressure_prog_offset = Pressure_ProgTrigOffset[prog_to_run];
   pressure_next_prog = Pressure_NextProg[prog_to_run];
-  pressure_repeat = Pressure_ProgRepeat[prog_to_run];
 
-  current_pressure_goal = 0.0;
 
-  program_offset_timer = timer.in(10 + pressure_prog_offset, start_prog_pressure);   // 10ms+ so timer will not be 0.
+  if (pressure_target > target_offset + 0.01) {
+    current_pressure_goal = pressure_step_atm;
+    current_pressure_goal = constrain(current_pressure_goal, 0, pressure_target);
+  } else {
+    current_pressure_goal = current_pressure_sensor - pressure_step_atm;
+    current_pressure_goal = constrain(current_pressure_goal, pressure_target, current_pressure_sensor);
+  }
+  char bf0[10], bf1[10], bf2[10], bf3[10];
+  Debug.print(DBG_INFO, F("pressure_target:%s, current_pressure_sensor:%s, current_pressure_goal:%s, pressure_step_atm:%s\n"), \
+              dtostrf(pressure_target, 2, 2, bf0), \
+              dtostrf(current_pressure_sensor, 2, 2, bf1), \
+              dtostrf(current_pressure_goal, 2, 2, bf2), \
+              dtostrf(pressure_step_atm, 2, 2, bf3));
+
+  program_offset_timer = timer.in(10 + pressure_prog_offset * 1000, start_prog_pressure);   // 10ms+ so timer will not be 0.
   trig_timer = timer.every(10, check_trigs);                                // keep trigers active
   timer.cancel(next_p_timer);
 

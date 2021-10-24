@@ -3,7 +3,7 @@ const char string_01[] PROGMEM = "P=";
 const char string_02[] PROGMEM = "Pr";
 
 const char string_34[] PROGMEM = "scr090,2,R"; // screen 0, 2 lines ahead R for right as well
-const char string_35[] PROGMEM = "Run P";
+const char string_35[] PROGMEM = "Pr";
 const char string_36[] PROGMEM = "";
 
 const char string_03[] PROGMEM = "scr001,4";
@@ -62,6 +62,7 @@ const char string_32[] PROGMEM = "Start    pUp";
 const char string_33[] PROGMEM = " Stop    pDn";
 
 const char run_pr_offset[] PROGMEM = "->Ofst";
+const char run_pr_step_rest[] PROGMEM = "->StepRest";
 const char run_pr_in[] PROGMEM = "->ON";
 const char run_pr_out[] PROGMEM = "->OFF";
 const char run_pr_fin[] PROGMEM = "->FINISH";

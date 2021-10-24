@@ -69,6 +69,7 @@ volatile uint8_t prog_next = 10;          //  11=No next, if 10=same prog in rev
 uint8_t prog_run_x_times = 0;
 
 // --------- Pressure sensor program params
+volatile uint8_t pressure_main_prog_runing = 10;;
 volatile float pressure_target = 0.0;
 volatile float pressure_step_atm = 0.0;
 volatile uint8_t pressure_time_per_step = 0;

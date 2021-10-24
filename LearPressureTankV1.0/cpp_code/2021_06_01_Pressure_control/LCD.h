@@ -129,10 +129,10 @@ class lcd_menu
                     ((t_prog_sec == true) ? (char*)60 : (char*)0));
           //          if (defaultProg == true) strcat(buffer, "<-");
         }
-        else if (strcmp_P(_tmp_sec_str, PSTR("Run P")) == 0) {
+        else if (strcmp_P(_tmp_sec_str, PSTR("Pr")) == 0) {
           if (prog_to_run != 10) {
             char bf[10];
-            sprintf_P(buffer, PSTR("%d P=%s"), prog_to_run, dtostrf(this->pressure, 2, 2, bf));
+            sprintf_P(buffer, PSTR("%dx%d P=%s"), prog_to_run, pressure_repeat, dtostrf(this->pressure, 2, 2, bf));
             if (prog_run_x_times > 0) sprintf(buffer, "%sx%d", buffer, prog_run_x_times);
           }
           if (prog_to_run == 10) {
@@ -325,7 +325,7 @@ class lcd_menu
         sprintf_P(buffer, PSTR("%s"), dtostrf(this->pressure, 2, 2, bf)/*P_val*/);
         lcd.print(buffer);
       } else if (this->cur_screen == 90) {
-        lcd.setCursor(9, 0);
+        lcd.setCursor(8, 0);
         char bf[10];
         sprintf_P(buffer, PSTR("%s"), dtostrf(this->pressure, 2, 2, bf)/*P_val*/);
         lcd.print(buffer);

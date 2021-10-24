@@ -1,0 +1,6 @@
+#include "globals.h"
+#include "lcd_tab.h"
+#include "tools_tab.h"
+#include "serial_tab.h"
+#include "bmp_tab.h"
+#include "filter_tab.h"

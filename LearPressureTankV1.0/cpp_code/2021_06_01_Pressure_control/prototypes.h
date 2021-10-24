@@ -34,4 +34,5 @@ float read_pressure_sensor();
 unsigned long how_far_pressure(float _p_goal);
 void pressure_update_on_rest_timer();
 bool go_to_pressure();
+void run_program_with_sensor_next_prog();
 //void handleEvent(AceButton* button, uint8_t eventType, uint8_t buttonState);

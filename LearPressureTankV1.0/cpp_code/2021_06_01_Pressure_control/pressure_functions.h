@@ -13,7 +13,6 @@ unsigned long how_far_pressure(float _p_goal) {
   unsigned long tmp_val = ms_low_pulse;
   float pressure_now = current_pressure_sensor; //check_pressure_sensor();
   float abs_dist = fabs(pressure_now - _p_goal);
-
   if (abs_dist > 0.2) {
     tmp_val = abs_dist * ms_weight * 1.0;
     //    tmp_val = ms_high_pulse;
@@ -22,6 +21,16 @@ unsigned long how_far_pressure(float _p_goal) {
     //    tmp_val = ms_mid_pulse;
   } else {
     tmp_val = abs_dist * ms_weight * 0.92;
+  }
+
+  if (prog_in_out == RELIEF_AIR  ) {
+    if (pressure_now < 0.25) {
+      tmp_val *= 5.6; // going much slower when air goes out on low pressure
+    } else if (pressure_now < 0.35) {
+      tmp_val *= 3;
+    } else if (pressure_now < 0.8) {
+      tmp_val *= 2;
+    }
   }
 
   char bf1[10], bf2[10], bf3[10], bf4[10];
@@ -49,22 +58,45 @@ bool check_func() {
 void check_pressure_and_decide() {
   float pressure_now = current_pressure_sensor; //check_pressure_sensor();
   bool go_to_p_flag = false;
+  bool program_end = false;
 
   if (!pressure_in_range(pressure_now, current_pressure_goal)) { // small step
     go_to_p_flag = true;
   } else {
     if (pressure_in_range(pressure_now, pressure_target)) { // main pressure goal
       // do nothing -- stop?
-       Debug.print(DBG_INFO, F("-----GOAL ACHIEVED----- STOP");
+      Debug.print(DBG_INFO, F("-----GOAL ACHIEVED----- STOP PROG\n"));
+      if (pressure_repeat > 0 and pressure_next_prog != 10) { // if there is next prog and repeat more than 0
+        prog_to_run = pressure_next_prog;
+        if (pressure_main_prog_runing == prog_to_run) pressure_repeat--;
+        if (pressure_repeat != 0) {
+          run_program_with_sensor_next_prog();
+        } else {
+          program_end = true;
+        }
+      } else {
+        program_end = true;
+      }
     } else {
-      current_pressure_goal = (pressure_target > pressure_now) ? current_pressure_goal + pressure_step_atm : current_pressure_goal - pressure_step_atm;
-      current_pressure_goal = constrain(current_pressure_goal, 0, pressure_target);
+      current_pressure_goal = (pressure_target > pressure_now) ? \
+                              current_pressure_goal + pressure_step_atm : \
+                              current_pressure_goal - pressure_step_atm;
+      current_pressure_goal = (pressure_target > pressure_now) ? \
+                              constrain(current_pressure_goal, 0, pressure_target) : \
+                              constrain(current_pressure_goal, pressure_target, pressure_now);
       //      go_to_p_flag = true;
       timer.cancel(stop_pressure_fill_timer);
-//      pressure_step_wait_timer = timer.in(pressure_time_per_step * 1000, check_func);
+      //      pressure_step_wait_timer = timer.in(pressure_time_per_step * 1000, check_func);
       pressure_step_wait_timer = timer.in(pressure_time_per_step * 1000, go_to_pressure);
 
       Debug.print(DBG_INFO, F("-----STEP WAIT----- pressure_step_atm:%d[sec]\n"), pressure_time_per_step);
+      strcpy_P(run_status, run_pr_step_rest);
+      menu.update_screen();
+    }
+
+    if (program_end) {
+      strcpy_P(run_status, run_pr_fin);
+      menu.update_screen();
     }
   }
   prog_in_out = (pressure_now < current_pressure_goal) ? FILL_AIR : RELIEF_AIR;
